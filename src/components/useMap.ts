@@ -14,7 +14,8 @@ import {
     Fill, Stroke, Style,
 } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
-import BingMaps from 'ol/source/BingMaps';
+// import BingMaps from 'ol/source/BingMaps';
+import OSM from 'ol/source/OSM';
 import { transform } from 'ol/proj';
 import { debounce } from 'lodash';
 import { Select } from 'ol/interaction';
@@ -106,11 +107,12 @@ const useMap = () => {
                 new TileLayer({
                     visible: true,
                     preload: Infinity,
-                    source: new BingMaps({
-                        key: import.meta.env.VITE_BING_MAPS_API_KEY,
-                        imagerySet: 'canvasLight',
+                    // source: new BingMaps({
+                    //     key: import.meta.env.VITE_BING_MAPS_API_KEY,
+                    //     imagerySet: 'canvasLight',
 
-                    }),
+                    // }),
+                    source: new OSM()
                 }),
             ],
             view: new View({
