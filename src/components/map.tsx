@@ -1,4 +1,3 @@
-import React from 'react';
 import MapComponent from './map_component';
 
 const Geotagging = () => {
