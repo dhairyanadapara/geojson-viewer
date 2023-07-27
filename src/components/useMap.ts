@@ -14,8 +14,8 @@ import {
     Fill, Stroke, Style,
 } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
-// import BingMaps from 'ol/source/BingMaps';
-import OSM from 'ol/source/OSM';
+import BingMaps from 'ol/source/BingMaps';
+// import OSM from 'ol/source/OSM';
 import { transform } from 'ol/proj';
 import { debounce } from 'lodash';
 import { Select } from 'ol/interaction';
@@ -75,14 +75,14 @@ const useMap = () => {
         }),
     });
 
-    const hoverStyle = (feature: { get: (arg0: string) => string; }) => {
-        const color = feature.get('COLOR') || 'rgba(0, 0, 255, 0.3)';
+    const hoverStyle = () => {
+        const color = '#3275EA60';
         selected.getFill().setColor(color);
         return selected;
     };
 
-    const selectStyle = (feature: { get: (arg0: string) => string; }) => {
-        const color = feature.get('COLOR') || 'rgba(0, 255, 255, 0.3)';
+    const selectStyle = () => {
+        const color = '#3275EA99';
         selected.getFill().setColor(color);
         return selected;
     };
@@ -107,12 +107,12 @@ const useMap = () => {
                 new TileLayer({
                     visible: true,
                     preload: Infinity,
-                    // source: new BingMaps({
-                    //     key: import.meta.env.VITE_BING_MAPS_API_KEY,
-                    //     imagerySet: 'canvasLight',
+                    source: new BingMaps({
+                        key: import.meta.env.VITE_BING_MAPS_API_KEY,
+                        imagerySet: 'canvasLight',
 
-                    // }),
-                    source: new OSM()
+                    }),
+                    // source: new OSM()
                 }),
             ],
             view: new View({
@@ -143,7 +143,7 @@ const useMap = () => {
             source: vectorSource,
             style: new Style({
                 fill: new Fill({
-                    color: level === 1 ? '#2069E866' : '#FBE8E8', // Red color with 50% transparency
+                    color: level === 1 ? '#3275EA40' : '#FBE8E8', // Red color with 50% transparency
                 }),
                 stroke: new Stroke({
                     color: 'rgba(255, 255, 255, 1)',
