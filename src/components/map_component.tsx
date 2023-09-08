@@ -39,7 +39,7 @@ const MapComponent = () => {
     };
 
     const fetchData = async () => {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/geojson_by_viewport`,
+        const response = await fetch(`${import.meta.env.VITE_API_SERVER_URL}/geojson_by_viewport`,
             {
                 method: "post",
                 headers: {
@@ -58,7 +58,7 @@ const MapComponent = () => {
     }
 
     const getAllGeoJSON = async () => {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/geojsons`,
+        const response = await fetch(`${import.meta.env.VITE_API_SERVER_URL}/geojsons`,
             {
                 method: "get",
                 headers: {
