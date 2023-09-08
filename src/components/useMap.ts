@@ -62,7 +62,7 @@ const maskGeojson = {
 
 const useMap = () => {
     const mapRef = useRef<Map>(null);
-    const [borderPoints, setBorderPoints] = useState<[number, number][]>([]);
+    const [borderGeoJSON, setBorderGeoJSON] = useState<[number, number][]>([]);
     const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
 
     const selected = new Style({
@@ -251,18 +251,25 @@ const useMap = () => {
         });
     };
 
-    useEffect(() => {
-        const calculateExtent = () => {
-            const extent = mapRef.current.getView().calculateExtent(mapRef.current.getSize());
-            const topLeft = transform([extent[0], extent[3]], 'EPSG:3857', 'EPSG:4326').reverse();
-            const topRight = transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326').reverse();
-            const bottomRight = transform([extent[2], extent[1]], 'EPSG:3857', 'EPSG:4326').reverse();
-            const bottomLeft = transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326').reverse();
-            setBorderPoints([topLeft, topRight, bottomRight, bottomLeft]);
-            // console.log(topLeft, topRight, bottomRight, bottomLeft);
+    const createViewportBorderGeoJSON = () => {
+        const view = mapRef.current.getView();
+        const extent = view.calculateExtent(mapRef.current.getSize());
+        const topLeft = transform([extent[0], extent[3]], 'EPSG:3857', 'EPSG:4326');
+        const topRight = transform([extent[2], extent[3]], 'EPSG:3857', 'EPSG:4326');
+        const bottomRight = transform([extent[2], extent[1]], 'EPSG:3857', 'EPSG:4326');
+        const bottomLeft = transform([extent[0], extent[1]], 'EPSG:3857', 'EPSG:4326');
+
+        const geojson = {
+            type: 'Polygon',
+            coordinates: [[topLeft, topRight, bottomRight, bottomLeft, topLeft]],
         };
 
-        const debouncedCalculateExtent = debounce(calculateExtent, 1000);
+        setBorderGeoJSON(geojson)
+    }
+
+    useEffect(() => {
+
+        const debouncedCalculateExtent = debounce(createViewportBorderGeoJSON, 1000);
 
         mapRef.current?.on('moveend', debouncedCalculateExtent);
 
@@ -272,7 +279,8 @@ const useMap = () => {
     }, [mapRef]);
 
     return {
-        map: mapRef.current, addLayer, handleZoomIn, handleZoomOut, selectedLayer, borderPoints, addMaskLayer,
+        map: mapRef.current, addLayer, handleZoomIn, handleZoomOut, selectedLayer, addMaskLayer,
+        borderGeoJSON
     };
 };
 

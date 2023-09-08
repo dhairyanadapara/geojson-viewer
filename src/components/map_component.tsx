@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import 'ol/ol.css';
 
 import useMap from './useMap';
@@ -11,7 +11,7 @@ import { IconButton } from '@chakra-ui/react';
 
 const MapComponent = () => {
     const {
-        addLayer, handleZoomIn, handleZoomOut,
+        addLayer, handleZoomIn, handleZoomOut, borderGeoJSON,
     } = useMap();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +37,51 @@ const MapComponent = () => {
     const handleCustomButtonClick = () => {
         fileInputRef.current?.click();
     };
+
+    const fetchData = async () => {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/geojson_by_viewport`,
+            {
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                mode: "cors",
+                referrerPolicy: "no-referrer",
+                body: borderGeoJSON,
+            }
+        )
+
+        const data = await response.json();
+
+        console.log(data)
+    }
+
+    const getAllGeoJSON = async () => {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/geojsons`,
+            {
+                method: "get",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                mode: "cors",
+                referrerPolicy: "no-referrer",
+            }
+        )
+
+        const data = await response.json();
+
+        console.log(data)
+    }
+
+    useEffect(() => {
+        getAllGeoJSON()
+    }, [])
+
+    useEffect(() => {
+        fetchData()
+    }, [borderGeoJSON])
 
     return (
         <div className="map-container">
