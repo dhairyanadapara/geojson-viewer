@@ -9,7 +9,7 @@ import 'ol/ol.css';
 import { Map, View } from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
+import { OSM, Vector as VectorSource } from 'ol/source';
 import {
     Fill, Stroke, Style,
 } from 'ol/style';
@@ -62,8 +62,9 @@ const maskGeojson = {
 
 const useMap = () => {
     const mapRef = useRef<Map>(null);
-    const [borderGeoJSON, setBorderGeoJSON] = useState<[number, number][]>([]);
+    const [borderGeoJSON, setBorderGeoJSON] = useState<[number, number][]>(null);
     const [selectedLayer, setSelectedLayer] = useState<string | null>(null);
+    const [layers, setLayers] = useState({})
 
     const selected = new Style({
         fill: new Fill({
@@ -93,27 +94,27 @@ const useMap = () => {
             // id of div where map will be loaded
             target: 'map',
             layers: [
-                // new TileLayer({
-                //   source: new OSM(),
-                // }),
-                // new TileLayer({
-                //   visible: true,
-                //   preload: Infinity,
-                //   source: new BingMaps({
-                //     key: process.env.REACT_APP_BING_MAPS_API_KEY,
-                //     imagerySet: 'Aerial',
-                //   }),
-                // }),
+                new TileLayer({
+                    source: new OSM(),
+                }),
                 new TileLayer({
                     visible: true,
                     preload: Infinity,
                     source: new BingMaps({
-                        key: import.meta.env.VITE_BING_MAPS_API_KEY,
-                        imagerySet: 'canvasLight',
-
+                        key: process.env.REACT_APP_BING_MAPS_API_KEY,
+                        imagerySet: 'Aerial',
                     }),
-                    // source: new OSM()
                 }),
+                // new TileLayer({
+                //     visible: true,
+                //     preload: Infinity,
+                //     source: new BingMaps({
+                //         key: import.meta.env.VITE_BING_MAPS_API_KEY,
+                //         imagerySet: 'canvasLight',
+
+                //     }),
+                //     // source: new OSM()
+                // }),
             ],
             view: new View({
                 center: transform([-95, 40], 'EPSG:4326', 'EPSG:3857'),
@@ -129,7 +130,7 @@ const useMap = () => {
     }, []);
 
     // Add new geoJSON layer
-    const addLayer = useCallback((geoJson: GeoJSONData, level: number) => new Promise((resolve) => {
+    const addLayer = useCallback((id: number, geoJson: GeoJSONData) => new Promise((resolve) => {
         if (!mapRef.current) return
 
         const vectorSource = new VectorSource({
@@ -143,7 +144,7 @@ const useMap = () => {
             source: vectorSource,
             style: new Style({
                 fill: new Fill({
-                    color: level === 1 ? '#3275EA40' : '#FBE8E8', // Red color with 50% transparency
+                    color: '#FF0000FF', // Red color with 50% transparency
                 }),
                 stroke: new Stroke({
                     color: 'rgba(255, 255, 255, 1)',
@@ -151,10 +152,13 @@ const useMap = () => {
                 }),
             }),
             zIndex: 1,
-            name: 'Hello',
         });
 
         mapRef.current?.addLayer(vectorLayer);
+        setLayers((prevState) => ({
+            ...prevState,
+            [id]: vectorLayer
+        }))
 
         const selectPointerMove = new Select({
             condition: pointerMove,
@@ -201,6 +205,19 @@ const useMap = () => {
         resolve(true);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }), []);
+
+    const removeLayer = (id) => {
+
+        console.log("removing", layers[id])
+
+        mapRef.current?.removeLayer(layers[id]);
+        setLayers((prevState) => {
+            const clone = { ...prevState }
+            delete clone[id];
+
+            setLayers(clone)
+        })
+    }
 
     // Add masking layer
     const addMaskLayer = () => {
@@ -280,7 +297,7 @@ const useMap = () => {
 
     return {
         map: mapRef.current, addLayer, handleZoomIn, handleZoomOut, selectedLayer, addMaskLayer,
-        borderGeoJSON
+        borderGeoJSON, removeLayer
     };
 };
 

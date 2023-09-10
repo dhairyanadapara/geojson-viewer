@@ -1,17 +1,19 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import 'ol/ol.css';
 
 import useMap from './useMap';
 import { MinusIcon, AddIcon, EditIcon, SearchIcon } from '@chakra-ui/icons'
 import { GeoJSONData } from '../types';
 import { IconButton } from '@chakra-ui/react';
+import { differenceBy, intersectionBy } from 'lodash';
 // import useGeoJson from '../useGeoJson';
 
 const MapComponent = () => {
+    const [geoJSONStore, setGeoJSONStore] = useState([])
     const {
-        addLayer, handleZoomIn, handleZoomOut, borderGeoJSON,
+        addLayer, handleZoomIn, handleZoomOut, borderGeoJSON, removeLayer
     } = useMap();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,14 +49,27 @@ const MapComponent = () => {
                     "Access-Control-Allow-Origin": "*",
                 },
                 mode: "cors",
-                referrerPolicy: "no-referrer",
-                body: borderGeoJSON,
+                body: JSON.stringify(borderGeoJSON),
             }
         )
 
         const data = await response.json();
 
-        console.log(data)
+        // console.log("geojson_list", data.geojson_list)
+        // console.log("old geojson_list", geoJSONStore)
+
+
+        const commonBoundaries = intersectionBy(geoJSONStore, data.geojson_list, 'id')
+        const removedBoundaries = differenceBy(geoJSONStore, commonBoundaries, 'id')
+
+
+        removedBoundaries.map(({ id }) => removeLayer(id))
+        // console.log("commonBoundaries", commonBoundaries)
+        // console.log("removedBoundaries", removedBoundaries)
+
+
+        data.geojson_list.map(({ id, geojson_data }) => addLayer(id, geojson_data))
+        setGeoJSONStore(data.geojson_list)
     }
 
     const getAllGeoJSON = async () => {
@@ -65,14 +80,12 @@ const MapComponent = () => {
                     "Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*",
                 },
-                mode: "cors",
-                referrerPolicy: "no-referrer",
+                mode: "cors"
             }
         )
 
         const data = await response.json();
 
-        console.log(data)
     }
 
     useEffect(() => {
@@ -80,7 +93,10 @@ const MapComponent = () => {
     }, [])
 
     useEffect(() => {
-        fetchData()
+        if (borderGeoJSON) {
+            fetchData()
+        }
+
     }, [borderGeoJSON])
 
     return (
