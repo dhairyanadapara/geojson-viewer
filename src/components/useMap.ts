@@ -144,7 +144,7 @@ const useMap = () => {
             source: vectorSource,
             style: new Style({
                 fill: new Fill({
-                    color: '#FF0000FF', // Red color with 50% transparency
+                    color: '#FF000033', // Red color with 50% transparency
                 }),
                 stroke: new Stroke({
                     color: 'rgba(255, 255, 255, 1)',
@@ -208,7 +208,7 @@ const useMap = () => {
 
     const removeLayer = (id) => {
 
-        console.log("removing", layers[id])
+        // console.log("removing", id, layers[id])
 
         mapRef.current?.removeLayer(layers[id]);
         setLayers((prevState) => {

@@ -61,14 +61,16 @@ const MapComponent = () => {
 
         const commonBoundaries = intersectionBy(geoJSONStore, data.geojson_list, 'id')
         const removedBoundaries = differenceBy(geoJSONStore, commonBoundaries, 'id')
+        const newBoundaries = differenceBy(data.geojson_list, commonBoundaries, 'id')
 
 
         removedBoundaries.map(({ id }) => removeLayer(id))
         // console.log("commonBoundaries", commonBoundaries)
         // console.log("removedBoundaries", removedBoundaries)
+        // console.log("addedBroundaries", newBoundaries)
 
 
-        data.geojson_list.map(({ id, geojson_data }) => addLayer(id, geojson_data))
+        newBoundaries.map(({ id, geojson_data }) => addLayer(id, geojson_data))
         setGeoJSONStore(data.geojson_list)
     }
 
