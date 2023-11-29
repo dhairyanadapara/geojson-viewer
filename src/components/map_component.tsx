@@ -26,7 +26,7 @@ const MapComponent = () => {
             reader.onload = (e) => {
                 try {
                     const geojsonData = JSON.parse(e.target?.result as string) as GeoJSONData;
-                    addLayer(geojsonData, 1);
+                    addLayer(1, geojsonData);
                 }
                 catch (error) {
                     console.error('Error parsing GeoJSON file:', error);
